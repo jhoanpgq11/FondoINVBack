@@ -15,36 +15,28 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.*;
 
+
 public class EmailService {
 	
-	@Autowired
-	private SesClient sesClient;
+		@Autowired
+	    private SesClient sesClient;
 
-    
-    public void EmailService(SesClient sesClient) {
-        this.sesClient = sesClient;
-    }
+	    public void sendEmail(String from, String to, String subject, String textBody, String htmlBody) {
+	        SendEmailRequest request = SendEmailRequest.builder()
+	                .source(from)
+	                .destination(Destination.builder().toAddresses(to).build())
+	                .message(Message.builder()
+	                        .subject(Content.builder().data(subject).build())
+	                        .body(Body.builder()
+	                                .text(Content.builder().data(textBody).build())
+	                                .html(Content.builder().data(htmlBody).build())
+	                                .build())
+	                        .build())
+	                .build();
 
-    public void enviarNotificacion(String remitente, String destinatario, String asunto, String textoPlano, String cuerpoHtml) {
-        // Crear la solicitud de envío de correo electrónico
-        SendEmailRequest solicitud = SendEmailRequest.builder()
-                .source(remitente)
-                .destination(Destination.builder().toAddresses(destinatario).build())
-                .message(Message.builder()
-                        .subject(Content.builder().data(asunto).build())
-                        .body(Body.builder()
-                                .text(Content.builder().data(textoPlano).build())
-                                .html(Content.builder().data(cuerpoHtml).build())
-                                .build())
-                        .build())
-                .build();
-
-        // Enviar el correo electrónico utilizando SES
-        SendEmailResponse respuesta = sesClient.sendEmail(solicitud);
-
-        // Registrar el ID del mensaje enviado
-        System.out.println("Correo enviado exitosamente. ID del mensaje: " + respuesta.messageId());
-    }
+	        SendEmailResponse response = sesClient.sendEmail(request);
+	        System.out.println("Email sent! Message ID: " + response.messageId());
 	
 	
+}
 }

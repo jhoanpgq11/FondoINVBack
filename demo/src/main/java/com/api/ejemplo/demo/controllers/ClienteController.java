@@ -27,14 +27,82 @@ public class ClienteController {
         this.clienteService = clienteService;
     }
 
-    @GetMapping("/{id}")
-    public Cliente obtenerCliente(@PathVariable String id) throws Exception {
-        return clienteService.getClienteById(id);
+    @PostMapping
+	public ResponseEntity<Cliente> crearCliente(@RequestBody Cliente cliente) {
+        Cliente nuevoCliente = clienteService.crearCliente(cliente.getNombres(),cliente.getApellidos(),cliente.getTipoIdentificacion(),cliente.getNumeroIdentificacion(),
+                                cliente.getEmail(),cliente.getTelefono(),cliente.getSaldoActual(),cliente.getPreferenciaNotificacion(), cliente.getFondosSuscritos(), cliente.getHistorialTransacciones());
+        return ResponseEntity.ok(nuevoCliente);
+    }
+	
+	
+    @GetMapping("/{clienteId}")
+    public Optional<Cliente> obtenerCliente(@PathVariable String clienteId) {
+        return clienteService.obtenerCliente(clienteId);
     }
 
-    @PostMapping
-    public Cliente crearCliente(@RequestBody Cliente cliente) {
-        return clienteService.crearCliente(cliente);
+    @GetMapping
+    public ResponseEntity<Iterable<Cliente>> obtenerTodosLosClientes() {
+        Iterable<Cliente> clientes = clienteService.obtenerTodosLosClientes();
+        return ResponseEntity.ok(clientes);
     }
-	 
+
+    @GetMapping("/buscar/{numeroIdentificacion}")
+    public ResponseEntity<?> buscarPorNumeroIdentificacion(@PathVariable String numeroIdentificacion) {
+        try {
+            Cliente cliente = clienteService.buscarPorNumeroIdentificacion(numeroIdentificacion);
+            return ResponseEntity.ok(cliente);
+        } catch (RuntimeException e) {
+            // Captura la excepción y devuelve un mensaje de error apropiado
+            Map<String, String> errorResponse = Collections.singletonMap("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+    
+    @PostMapping("/{clienteId}/fondos")
+    public ResponseEntity<Object> asociarFondos(@PathVariable String clienteId,
+                                                @RequestBody List<FondoSuscrito> fondosSuscritos) {
+        try {
+            Cliente cliente = clienteService.asociarFondos(clienteId, fondosSuscritos);
+            return ResponseEntity.ok(cliente);
+        } catch (RuntimeException e) {
+            // Captura la excepción y devuelve un mensaje de error apropiado
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(Collections.singletonMap("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{clienteId}/cancelarFondos")
+    public ResponseEntity<Object>cancelarFondos(@PathVariable String clienteId,
+                                                @RequestBody List<FondoSuscrito> fondosSuscritos) {
+        try {
+            Cliente cliente = clienteService.cancelarFondos(clienteId, fondosSuscritos);
+            return ResponseEntity.ok(cliente);
+        } catch (RuntimeException e) {
+            // Captura la excepción y devuelve un mensaje de error apropiado
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(Collections.singletonMap("message", e.getMessage()));
+        }
+    }
+
+   
+
+   @GetMapping("/{clienteId}/transacciones")
+    public ResponseEntity<List<Transaccion>> obtenerTransaccionesDeCliente(@PathVariable String clienteId) {
+        List<Transaccion> transacciones = clienteService.obtenerTransaccionesDeCliente(clienteId);
+        return ResponseEntity.ok(transacciones);
+    }
+      
+
+    @GetMapping("/transaccionesCli")
+    public ResponseEntity<List<Transaccion>> obtenerTransaccionesDeTodosLosClientes() {
+        List<Transaccion> transacciones = clienteService.obtenerTransaccionesDeTodosLosClientes();
+        return ResponseEntity.ok(transacciones);
+    }
+
+    @GetMapping("/transacciones")
+    public ResponseEntity<List<Map<String, Object>>> obtenerTransaccionesConDatosClientes() {
+        List<Map<String, Object>> transaccionesConCliente = clienteService.obtenerTransaccionesConDatosClientes();
+        return ResponseEntity.ok(transaccionesConCliente);
+    }
+   
 }
