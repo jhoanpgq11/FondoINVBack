@@ -1,0 +1,74 @@
+
+
+
+
+Coleccion:
+Cliente:
+[
+    {
+        "id": "cliente1",
+        "nombre": "Jhoan Garcia",
+        "email": "jhoa.garcia@yopmail.com",
+        "telefono": "12345",
+        "saldoActual": 2000.0,
+        "preferenciaNotificacion": "email",
+        "fondosSuscritos": [],
+        "historialTransacciones": []
+    },
+    {
+        "id": "cliente2",
+        "nombre": "Valentina Garcia",
+        "email": "Valentina.garcia@yopmail.com",
+        "telefono": "098765",
+        "saldoActual": 100.0,
+        "preferenciaNotificacion": "sms",
+        "fondosSuscritos": [],
+        "historialTransacciones": []
+    }
+]
+
+Fondo:
+
+    {
+        "id": "fondo1",
+        "nombreFondo": "Fondo de Inversión A",
+        "descripcion": "Fondo de inversión de alto rendimiento.",
+        "montoMinimo": 100.0
+    },
+    {
+        "id": "fondo2",
+        "nombreFondo": "Fondo de Ahorro B",
+        "descripcion": "Fondo para ahorrar a largo plazo.",
+        "montoMinimo": 200.0
+    }
+]
+
+FondoSuscrito
+
+[
+    {
+        "clienteId": "cliente1",
+        "fondoId": "fondo1"
+    },
+    {
+        "clienteId": "cliente2",
+        "fondoId": "fondo2"
+    }
+]
+Transaccion:
+[
+    {
+        "id": "transaccion1",
+        "tipo": "suscripción",
+        "fondoId": "fondo1",
+        "clienteId": "cliente1",
+        "monto": 100.0
+    },
+    {
+        "id": "transaccion2",
+        "tipo": "cancelación",
+        "fondoId": "fondo2",
+        "clienteId": "cliente2",
+        "monto": 200.0
+    }
+]
