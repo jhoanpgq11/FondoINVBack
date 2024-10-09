@@ -1,0 +1,66 @@
+package com.api.ejemplo.demo.controllers;
+
+import com.api.ejemplo.demo.model.Fondo;
+import com.api.ejemplo.demo.service.FondoService;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/fondos")
+public class FondoController {
+
+    private final FondoService fondoService;
+
+    public FondoController(FondoService fondoService) {
+        this.fondoService = fondoService;
+    }
+
+    // Obtener todos los fondos
+    @GetMapping
+    public ResponseEntity<List<Fondo>> listarFondos() {
+        List<Fondo> fondos = fondoService.obtenerTodosLosFondos();
+        return ResponseEntity.ok(fondos);
+    }
+
+    // Suscribirse a un fondo
+    @PostMapping("/suscribir")
+    public void suscribirAFondo(@RequestParam String clienteId, @RequestParam String fondoId) {
+        try {
+            String resultado = fondoService.suscribirAFondo(clienteId, fondoId);
+            return;
+        } catch (Exception e) {
+            try {
+				return;
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				try {
+					e1.printStackTrace();
+				} catch (Exception e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+            }
+    }
+    }
+    // Cancelar suscripción a un fondo
+    @PostMapping("/cancelar")
+    public ResponseEntity<String> cancelarFondo(@RequestParam String clienteId, @RequestParam String fondoId) {
+        try {
+            String resultado = fondoService.cancelarFondo(clienteId, fondoId);
+            return ResponseEntity.ok(resultado);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // Obtener historial de transacciones
+    @GetMapping("/{clienteId}/transacciones")
+    public ResponseEntity<List<String>> obtenerHistorialTransacciones(@PathVariable String clienteId) throws Exception {
+        List<String> transacciones = fondoService.obtenerHistorialTransacciones(clienteId);
+        return ResponseEntity.ok(transacciones);
+    }
+}

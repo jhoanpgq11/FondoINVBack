@@ -1,0 +1,22 @@
+package com.api.ejemplo.demo.service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import org.springframework.stereotype.Service;
+
+import com.api.ejemplo.demo.model.Cliente;
+import com.api.ejemplo.demo.model.Transaccion;
+import com.api.ejemplo.demo.repository.ClienteRepository;
+import com.api.ejemplo.demo.repository.FondoRepository;
+
+@Service
+public class ClienteService {
+	 
+
+    
+
+}

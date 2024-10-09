@@ -1,0 +1,16 @@
+package com.api.ejemplo.demo.config;
+
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.model.*;
+import com.api.ejemplo.demo.service.NotificationService;
+
+@Component
+public class DynamoDBTaInit {
+	
+}

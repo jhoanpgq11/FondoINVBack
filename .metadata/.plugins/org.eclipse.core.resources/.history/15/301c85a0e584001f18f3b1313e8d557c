@@ -1,0 +1,5 @@
+package com.api.ejemplo.demo.config;
+
+public class DynamoDB {
+
+}

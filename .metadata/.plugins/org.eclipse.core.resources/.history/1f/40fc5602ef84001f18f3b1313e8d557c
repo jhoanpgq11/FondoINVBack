@@ -1,0 +1,5 @@
+package com.api.ejemplo.demo.model;
+
+public class FondoSuscrito {
+
+}

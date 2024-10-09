@@ -1,0 +1,8 @@
+package com.api.ejemplo.demo.exepciones;
+
+public class ModelNotFoundException {
+
+	 public ModelNotFoundException(String message) {
+	        super();
+	 }
+}

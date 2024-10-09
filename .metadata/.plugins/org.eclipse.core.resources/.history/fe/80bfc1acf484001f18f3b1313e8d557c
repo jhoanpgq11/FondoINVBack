@@ -1,0 +1,130 @@
+package com.api.ejemplo.demo.service;
+
+import com.api.ejemplo.demo.exepciones.ModelNotFoundException;
+import com.api.ejemplo.demo.model.Cliente;
+import com.api.ejemplo.demo.model.Fondo;
+import com.api.ejemplo.demo.model.FondoSuscrito;
+import com.api.ejemplo.demo.model.Transaccion;
+import com.api.ejemplo.demo.repository.ClienteRepository;
+import com.api.ejemplo.demo.repository.FondoRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+public class FondoService {
+
+	 private final ClienteRepository clienteRepository;
+	    private final FondoRepository fondoRepository;
+	    private final NotifacationService notifacationService;
+
+	    public FondoService(ClienteRepository clienteRepository, FondoRepository fondoRepository, NotifacationService notifacationService) {
+	        this.clienteRepository = clienteRepository;
+	        this.fondoRepository = fondoRepository;
+	        this.notifacationService = notifacationService;
+	    }
+
+	    // Obtener todos los fondos disponibles
+	    public List<Fondo> obtenerTodosLosFondos() {
+	        return fondoRepository.findAll();
+	    }
+
+	    // Suscribirse a un fondo
+	    public String suscribirAFondo(String clienteId, String fondoId) throws Exception {
+	        Optional<Cliente> clienteOpt = clienteRepository.findById(clienteId);
+	        Optional<Fondo> fondoOpt = fondoRepository.findById(fondoId);
+
+	        if (clienteOpt.isEmpty()) {
+	            throw new ModelNotFoundException("Cliente no encontrado.");
+	        }
+
+	        if (fondoOpt.isEmpty()) {
+	            throw new ModelNotFoundException("Fondo no encontrado.");
+	        }
+
+	        Cliente cliente = clienteOpt.get();
+	        Fondo fondo = fondoOpt.get();
+
+	        if (cliente.getSaldo() < fondo.getMontoMinimoVinculacion()) {
+	            throw new Exception("No tiene saldo disponible para vincularse al fondo " + fondo.getNombre());
+	        }
+
+	        // Actualizar saldo del cliente
+	        cliente.setSaldo(cliente.getSaldo() - fondo.getMontoMinimoVinculacion());
+	        clienteRepository.save(cliente);
+
+	        // Registrar suscripción al fondo
+	        FondoSuscrito fondoSuscrito = new FondoSuscrito(UUID.randomUUID().toString(), cliente, fondo);
+	        cliente.getFondosSuscritos().add(fondoSuscrito);
+	        clienteRepository.save(cliente);
+
+	        // Registrar la transacción
+	        Transaccion transaccion = new Transaccion(UUID.randomUUID().toString(), cliente, fondo, "Suscripción", fondo.getMontoMinimoVinculacion());
+	        cliente.getTransacciones().add(transaccion);
+	        clienteRepository.save(cliente);
+
+	        // Enviar notificación al cliente
+	        notifacationService.enviarNotificacion(cliente, "Te has suscrito al fondo " + fondo.getNombre());
+
+	        return "Suscripción exitosa al fondo " + fondo.getNombre();
+	    }
+
+	    // Cancelar suscripción a un fondo
+	    public String cancelarFondo(String clienteId, String fondoId) throws Exception {
+	        Optional<Cliente> clienteOpt = clienteRepository.findById(clienteId);
+	        Optional<Fondo> fondoOpt = fondoRepository.findById(fondoId);
+
+	        if (clienteOpt.isEmpty()) {
+	            throw new ModelNotFoundException("Cliente no encontrado.");
+	        }
+
+	        if (fondoOpt.isEmpty()) {
+	            throw new ModelNotFoundException("Fondo no encontrado.");
+	        }
+
+	        Cliente cliente = clienteOpt.get();
+	        Fondo fondo = fondoOpt.get();
+
+	        FondoSuscrito fondoSuscrito = cliente.getFondosSuscritos()
+	            .stream()
+	            .filter(fs -> fs.getFondo().getId().equals(fondoId))
+	            .findFirst()
+	            .orElseThrow(() -> new Exception("El cliente no está suscrito a este fondo."));
+
+	        // Cancelar suscripción y actualizar saldo
+	        cliente.getFondosSuscritos().remove(fondoSuscrito);
+	        cliente.setSaldo(cliente.getSaldo() + fondo.getMontoMinimoVinculacion());
+	        clienteRepository.save(cliente);
+
+	        // Registrar la transacción de cancelación
+	        Transaccion transaccion = new Transaccion(UUID.randomUUID().toString(), cliente, fondo, "Cancelación", fondo.getMontoMinimoVinculacion());
+	        cliente.getTransacciones().add(transaccion);
+	        clienteRepository.save(cliente);
+
+	        // Enviar notificación al cliente
+	        notifacationService.enviarNotificacion(cliente, "Has cancelado tu suscripción al fondo " + fondo.getNombre());
+
+	        return "Cancelación exitosa del fondo " + fondo.getNombre();
+	    }
+
+	    // Obtener historial de transacciones
+	    public List<String> obtenerHistorialTransacciones(String clienteId) throws Exception {
+	        Optional<Cliente> clienteOpt = clienteRepository.findById(clienteId);
+
+	        if (clienteOpt.isEmpty()) {
+	            throw new ModelNotFoundException("Cliente no encontrado.");
+	        }
+
+	        Cliente cliente = clienteOpt.get();
+	        List<String> historial = new ArrayList<>();
+
+	        for (Transaccion transaccion : cliente.getTransacciones()) {
+	            historial.add("Transacción: " + transaccion.getTipo() + " - Fondo: " + transaccion.getFondo().getNombre() + " - Monto: " + transaccion.getMonto());
+	        }
+
+	        return historial;
+	    }
+}

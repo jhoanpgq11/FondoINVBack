@@ -1,0 +1,12 @@
+package com.api.ejemplo.demo.service;
+
+import com.api.ejemplo.demo.model.Cliente;
+
+public class NotificationService {
+
+	public static void enviarNotificacion(Cliente cliente, String string) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}
