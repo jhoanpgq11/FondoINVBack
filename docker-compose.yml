@@ -1,0 +1,32 @@
+
+version: '3.8'
+
+services:
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"  # Puerto para la API de LocalStack
+      - "4571:4571"  # Puerto para el servicio de SNS (opcional)
+    environment:
+      - SERVICES=dynamodb,ses,sns  # Servicios habilitados en LocalStack
+      - AWS_ACCESS_KEY_ID=prueba    # Credenciales de acceso (solo para LocalStack)
+      - AWS_SECRET_ACCESS_KEY=prueba  # Credenciales de acceso
+      - AWS_SESSION_TOKEN=token_de_prueba  # Token de sesión (opcional)
+      - AWS_DEFAULT_REGION=us-west-2  # Región predeterminada
+    volumes:
+      - ./scripts:/scripts  # Montar scripts de inicialización
+      - localstack_data:/var/localstack  # Persistir datos de LocalStack
+    command: bash -c "/scripts/init_dynamodb_tables.sh"  # Inicializar tablas al iniciar LocalStack
+
+  init:
+    image: amazon/aws-cli  # Usar la CLI de AWS para inicializar tablas
+    depends_on:
+      localstack:
+        condition: service_healthy  # Esperar a que LocalStack esté listo
+    volumes:
+      - ./scripts:/scripts  # Montar scripts de inicialización
+    command: bash -c "sleep 10 && /scripts/init_dynamodb_tables.sh"  # Inicializar tablas después de esperar
+
+volumes:
+  localstack_data:
+    driver: local  # Persistir datos de LocalStack
